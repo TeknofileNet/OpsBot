@@ -27,8 +27,6 @@ SELF_RESPONSE = ["No patting yourself on the back!"]
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
-def help(channel):
-
 def get_most_recv(month_str):
   print(f"get_most_recv called with month_str:", month_str)
   if not month_str:
@@ -195,22 +193,6 @@ def message_default(client, message, say):
           f"{random.choice(HELP_RESPONSE)}"
         )
         client.chat_postMessage(channel=message['channel'], user=message['user'], text=help_msg)
-      match cmd_str:
-        case "help":
-          help_msg = (
-            f"*Send {PLURAL} to your friends:*\n"
-            f">Hey @shrek, I like you, have a :{EMOJI}:\n"
-            f">:{EMOJI}: @shrek @fiona\n"
-            f">I like that @boulder, it's a nice boulder :{EMOJI}: :{EMOJI}:\n"
-            f"*Other stuff:*\n"
-            f">`@bot me` Find out how many :{EMOJI}: you have\n"
-            f">`@bot ladder [month]` Find out who has the most :{EMOJI}:\n"
-            f">`@bot help` Print this message\n"
-            f"{random.choice(HELP_RESPONSE)}"
-          )
-          client.chat_postMessage(channel=message['channel'], user=message['user'], text=help_msg)
-        case _:
-          client.chat_postEphemeral(channel=message['channel'], user=message['user'], text="Unknown command. Type `@bot help` for assistance.")
 
 # Start the app
 if __name__ == "__main__":

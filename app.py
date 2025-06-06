@@ -18,10 +18,6 @@ LIMIT = int(os.getenv("LIMIT", "-1"))
 PER_USER_LIMIT = int(os.getenv("PER_USER_LIMIT", "-1"))
 SLACK_TOKEN = os.getenv("SLACKTOKEN")
 MYSQLPASS = os.getenv("MYSQLPASS")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = int(os.getenv("DB_PORT", "3306"))
-DB_NAME = os.getenv("DB_NAME", "kudos")
-DB_USER = os.getenv("DB_USER", "root")
 DB_PATH = os.getenv("DB_PATH", "kudos.db")
 
 KUDOS_RESPONSE = [":carrot: Nice!", ":carrot: Well done!"]
@@ -30,12 +26,14 @@ SELF_RESPONSE = ["No patting yourself on the back!"]
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
-# app = App(
-#     token=os.environ.get("SLACK_BOT_TOKEN"),
-#     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
-# )
+
+def help(channel):
 
 def get_most_recv(month_str):
+  print(f"get_most_recv called with month_str:", month_str)
+  if not month_str:
+    month_str = time.strftime("%B")  # Default to current month
+
   try:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -197,8 +195,23 @@ def message_default(client, message, say):
           f"{random.choice(HELP_RESPONSE)}"
         )
         client.chat_postMessage(channel=message['channel'], user=message['user'], text=help_msg)
+      match cmd_str:
+        case "help":
+          help_msg = (
+            f"*Send {PLURAL} to your friends:*\n"
+            f">Hey @shrek, I like you, have a :{EMOJI}:\n"
+            f">:{EMOJI}: @shrek @fiona\n"
+            f">I like that @boulder, it's a nice boulder :{EMOJI}: :{EMOJI}:\n"
+            f"*Other stuff:*\n"
+            f">`@bot me` Find out how many :{EMOJI}: you have\n"
+            f">`@bot ladder [month]` Find out who has the most :{EMOJI}:\n"
+            f">`@bot help` Print this message\n"
+            f"{random.choice(HELP_RESPONSE)}"
+          )
+          client.chat_postMessage(channel=message['channel'], user=message['user'], text=help_msg)
+        case _:
+          client.chat_postEphemeral(channel=message['channel'], user=message['user'], text="Unknown command. Type `@bot help` for assistance.")
 
 # Start the app
 if __name__ == "__main__":
-#  app.start(port=int(os.environ.get("PORT", 3000)))
   SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
